@@ -1,0 +1,31 @@
+version: '2'
+
+services:
+  crowi:
+    image: bakudankun/crowi:latest
+    links:
+      - mongo:db
+      - redis:redis
+      - elasticsearch:es
+    ports:
+      - 8080:3000
+    volumes:
+      - "./crowi:/data"
+
+  mongo:
+    image: mongo
+
+  redis:
+    image: redis:alpine
+
+  elasticsearch:
+    image: elasticsearch:2
+    # プラグインのKuromojiが必要
+    entrypoint:
+      - bash
+      - -c
+      - >-
+        bin/plugin list | grep -q analysis-kuromoji
+        || bin/plugin install analysis-kuromoji
+        && exec /docker-entrypoint.sh $$0 $$@
+    command: elasticsearch
